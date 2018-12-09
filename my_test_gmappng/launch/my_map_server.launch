@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- run the map server -->
+    <arg name="my_map" default="$(find my_test_gmappng)/maps/map.yaml"/>
+    <node pkg="map_server" type="map_server" name="map_server" args="$(arg my_map)" />
+</launch>

@@ -1,0 +1,6 @@
+<!-- <?xml version="1.0"?> -->
+<launch>
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_stage_4.launch"/>
+    <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch"/>
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_gazebo_rviz.launch"/>
+</launch>
