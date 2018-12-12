@@ -115,23 +115,23 @@ void my_encoder_init(void)
 
 int32_t my_encoder_get_left_var(void)
 {
-    int32_t left = QEIPositionGet(QEI1_BASE);
+    int32_t left = (int32_t)QEIPositionGet(QEI1_BASE)- 200000;
 
-    if (left >= 200000)
-        left -= 400000; // chay nguoc ve am
+    // if (left >= 200000)
+    //     left -= 400000; // chay nguoc ve am
 
-    QEIPositionSet(QEI1_BASE, 0);
+    QEIPositionSet(QEI1_BASE, 200000);
     return left;
 }
 
 int32_t my_encoder_get_right_var(void)
 {
-    int32_t right = QEIPositionGet(QEI0_BASE);
+    int32_t right = (int32_t)QEIPositionGet(QEI0_BASE) - 200000;
 
-    if (right >= 200000)
-        right -= 400000; // chay nguoc ve am
+    // if (right >= 200000)
+    //     right -= 400000; // chay nguoc ve am
 
-    QEIPositionSet(QEI0_BASE, 0);
+    QEIPositionSet(QEI0_BASE, 200000);
     return right;
 }
 

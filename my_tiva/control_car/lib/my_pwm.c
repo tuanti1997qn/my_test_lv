@@ -10,7 +10,7 @@
 
 #include "my_pwm.h"
 
-void mypwm_setpwm(select_motor channel, int duty, huong dir) // 0: thuan , 1 xuoi
+void mypwm_setpwm(select_motor channel, float duty, huong dir) // 0: thuan , 1 xuoi
 {
     if (duty > 100) duty = 100;
     if (duty < 0) duty = 0;
@@ -135,9 +135,9 @@ void init_PWM(void)
     // TODO: modify this calculation to use the clock frequency that you are
     // using.
     //
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 6400);
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_2, 6400);
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_1, 6400);
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 8000);
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_2, 8000);
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_1, 8000);
 
 
     //
@@ -147,8 +147,8 @@ void init_PWM(void)
     // 25% of the time or 16000 clock cycles (64000 / 4).
     //
     PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_0) / 4);
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
     // PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
     //
     // Enable the dead-band generation on the PWM0 output signal.  PWM bit 0
     // (PD0), will have a duty cycle of 25% (set above) and PWM bit 1 will have

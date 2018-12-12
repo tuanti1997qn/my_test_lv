@@ -14,6 +14,6 @@ typedef enum
 } select_motor;
 
 void init_PWM(void);
-void mypwm_setpwm(select_motor channel, int duty, huong dir); // channel 1: trai, 0: phai| dir 0: thuan , 1 nghich
+void mypwm_setpwm(select_motor channel, float duty, huong dir); // channel 1: trai, 0: phai| dir 0: thuan , 1 nghich
 
 #endif

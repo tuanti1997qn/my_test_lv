@@ -15,7 +15,7 @@ add_definitions(-DRX_BUFFER_SIZE=256)
 generate_tivac_firmware(
   SRCS 
     control_car.cpp
-    lib/main.c
+    lib/main_c.c
     lib/my_encoder.c
     lib/my_PID.c
     lib/my_pwm.c

@@ -3,17 +3,22 @@
 #include "my_pwm.h"
 #include "my_encoder.h"
 
+float debug;
+float my_debug_fnc(void)
+{
+    return debug;
+}
 PID_para
     left =
         {
-            .Kp = 1,
-            .Ki = 0.01,
-            .Kd = 0.001},
+            .Kp = 150,
+            .Ki = 30,
+            .Kd = 1.5},
     right =
         {
-            .Kp = 1,
-            .Ki = 0.01,
-            .Kd = 0.001};
+            .Kp = 150,
+            .Ki = 30,
+            .Kd = 1.5};
 
 float vel_left, vel_right, vel_left_sp, vel_right_sp;
 
@@ -97,7 +102,7 @@ static float my_PID_process(float *error, float *pre_error, PID_para *para, huon
     else
     {
         *dir = lui;
-        return P_part + I_part + D_part;
+        return -(P_part + I_part + D_part);
     }
 }
 
@@ -106,25 +111,25 @@ extern void my_custom_timer_ISR(void)
     static float error_left, pre_error_left, error_right, pre_error_right;
     huong dir;
 
-    //tinh van toc xe
+    // //tinh van toc xe
     vel_left = ((float)my_encoder_get_left_var() * cvb / xmv) / T;
 	// tinh sai so va set van toc
+    
     error_left = vel_left_sp - vel_left;
     if (vel_left_sp == 0)
     {
         mypwm_setpwm(left_motor, 0, dir);
-        pre_error_left = 0;
+        pre_error_left = vel_left_sp;
     }
     else
         mypwm_setpwm(left_motor, my_PID_process(&error_left, &pre_error_left, &left, &dir), dir);
-
     //tinh van toc xe
     vel_right = ((float)my_encoder_get_right_var() * cvb / xmv) / T;
     error_right = vel_right_sp - vel_right;
     if (vel_right_sp == 0)
     {
         mypwm_setpwm(right_motor, 0, dir);
-        pre_error_right = 0;
+        pre_error_right = vel_left_sp;
     }
     else
         mypwm_setpwm(right_motor, my_PID_process(&error_right, &pre_error_right, &right, &dir), dir);
