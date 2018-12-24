@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 /**************************************************
-    QEI1, PWM chanel 1: ben trai
-    QEI0, PWM chanel 0: ben phai
+     PWM chanel 1: ben trai
+    PWM chanel 0: ben phai
 
+    qei0: trai
+    qei1: phai
 **************************************************/
 void my_encoder_init(void);
 int32_t my_encoder_get_left_var(void);

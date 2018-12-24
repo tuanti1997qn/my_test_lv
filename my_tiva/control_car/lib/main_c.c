@@ -17,6 +17,8 @@ int main_c(void)
 	// config();
 	// my_imer_init();
 	init_PWM();
+	// mypwm_setpwm(left_motor,24,toi);
+	// mypwm_setpwm(right_motor, 40 , toi);
 	my_timer_init();
 	my_encoder_init();
 

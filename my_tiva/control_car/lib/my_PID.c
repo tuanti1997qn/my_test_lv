@@ -3,22 +3,25 @@
 #include "my_pwm.h"
 #include "my_encoder.h"
 
+
 float debug;
 float my_debug_fnc(void)
 {
     return debug;
 }
+
+
 PID_para
     left =
         {
-            .Kp = 150,
-            .Ki = 30,
-            .Kd = 1.5},
+            .Kp = 100,
+            .Ki = 40,
+            .Kd = 0},
     right =
         {
-            .Kp = 150,
-            .Ki = 30,
-            .Kd = 1.5};
+            .Kp = 100,
+            .Ki = 40,
+            .Kd = 0};
 
 float vel_left, vel_right, vel_left_sp, vel_right_sp;
 
@@ -108,7 +111,8 @@ static float my_PID_process(float *error, float *pre_error, PID_para *para, huon
 
 extern void my_custom_timer_ISR(void)
 {
-    static float error_left, pre_error_left, error_right, pre_error_right;
+    static float error_left, pre_error_left, error_right, pre_error_right, duty_temp;
+
     huong dir;
 
     // //tinh van toc xe
@@ -122,7 +126,14 @@ extern void my_custom_timer_ISR(void)
         pre_error_left = vel_left_sp;
     }
     else
-        mypwm_setpwm(left_motor, my_PID_process(&error_left, &pre_error_left, &left, &dir), dir);
+    {
+        duty_temp = my_PID_process(&error_left, &pre_error_left, &left, &dir);
+        mypwm_setpwm(left_motor, duty_temp , dir);
+        // mypwm_setpwm(left_motor, 99, toi);
+    // debug = my_PID_process(&error_left, &pre_error_left, &left, &dir);
+        debug = duty_temp;
+        // mypwm_setpwm(left_motor, 70, toi);
+    }
     //tinh van toc xe
     vel_right = ((float)my_encoder_get_right_var() * cvb / xmv) / T;
     error_right = vel_right_sp - vel_right;
@@ -132,7 +143,10 @@ extern void my_custom_timer_ISR(void)
         pre_error_right = vel_left_sp;
     }
     else
+    {
         mypwm_setpwm(right_motor, my_PID_process(&error_right, &pre_error_right, &right, &dir), dir);
+        // mypwm_setpwm(right_motor, 0, toi);
+    }
 }
 
 //float PID_controler(  )

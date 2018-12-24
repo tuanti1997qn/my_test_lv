@@ -26,9 +26,10 @@ static double Velocity_left = 0, Velocity_right = 0;
 
 
 /**************************************************
-    QEI1, PWM chanel 1: ben trai
+    PWM chanel 1: ben trai
     QEI0, PWM chanel 2: ben phai
-
+    qei0: ben trai
+    QEI1: ben phai
 **************************************************/
 void my_encoder_init(void)
 {
@@ -51,8 +52,8 @@ void my_encoder_init(void)
     
     /**********************************************************************************************************************/
         // config gpio pin PD0 PD1 de chua bug phan cung minh tao ra
-    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE , GPIO_PIN_0);
-    GPIOPinTypeGPIOInput(GPIO_PORTD_BASE , GPIO_PIN_1);
+    // GPIOPinTypeGPIOInput(GPIO_PORTD_BASE , GPIO_PIN_0);
+    // GPIOPinTypeGPIOInput(GPIO_PORTD_BASE , GPIO_PIN_1);
 
 
     /**********************************************************************************************************************/
@@ -115,23 +116,23 @@ void my_encoder_init(void)
 
 int32_t my_encoder_get_left_var(void)
 {
-    int32_t left = (int32_t)QEIPositionGet(QEI1_BASE)- 200000;
+    int32_t left = (int32_t)QEIPositionGet(QEI0_BASE)- 200000; // banh trai la qei0
 
     // if (left >= 200000)
     //     left -= 400000; // chay nguoc ve am
 
-    QEIPositionSet(QEI1_BASE, 200000);
+    QEIPositionSet(QEI0_BASE, 200000);
     return left;
 }
 
 int32_t my_encoder_get_right_var(void)
 {
-    int32_t right = (int32_t)QEIPositionGet(QEI0_BASE) - 200000;
+    int32_t right = (int32_t)QEIPositionGet(QEI1_BASE) - 200000; // banh phai la qei1
 
     // if (right >= 200000)
     //     right -= 400000; // chay nguoc ve am
 
-    QEIPositionSet(QEI0_BASE, 200000);
-    return right;
+    QEIPositionSet(QEI1_BASE, 200000);
+    return -right; // 1 cai xuoi, cai chay nguoc nen cai nay can lam nguoc lai
 }
 

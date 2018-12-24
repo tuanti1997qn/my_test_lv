@@ -10,39 +10,56 @@
 
 #include "my_pwm.h"
 
-void mypwm_setpwm(select_motor channel, float duty, huong dir) // 0: thuan , 1 xuoi
+/************************************************************************************************/
+/*
+        ben phai: PE4 ---> rst AB | PE5 ---> PWM A <--> M0PWM5
+        ben trai: PD0 ---> rst CD | PD1 ---> PWM C <--> M0PWM7
+*/
+/**************************************************************************************************/
+
+void mypwm_setpwm(select_motor channel, float duty, huong dir) // 0: thuan , 1 nguoc
 {
-    if (duty > 100) duty = 100;
-    if (duty < 0) duty = 0;
-    if (channel)
+    if (duty > 99)
+        duty = 99;
+    if (duty < 0)
+        duty = 0;
+    if (channel == left_motor) // channel 1 : ben trai
     {
         if (dir)
         {
-            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_0) * (duty/2 + 50)  / 100);
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_7, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_3) * (duty / 2 + 50) / 100);
             // GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_7 , 0);
-            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_7 , GPIO_PIN_7); // cai nay la do dung mod 4
+            GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, GPIO_PIN_0); // cai nay la do dung mod 4
         }
         else
         {
-            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_0) * (50-duty/2)  / 100);
-            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_7 , GPIO_PIN_7);
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_7, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_3) * (50 - duty / 2) / 100);
+            GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, GPIO_PIN_0);
         }
-        if (duty == 0) GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_7 , 0);
-    }    
-    else
+        if (duty == 0)
+        {
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_7, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_3) * 50 / 100);
+            GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, 0);
+        }
+    }
+    else // channel 2: ben phai
     {
         if (dir)
         {
-            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) * (duty/2 + 50)  / 100);
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_5, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) * (duty / 2 + 50) / 100);
             // GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 , 0);
-            GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_5 , GPIO_PIN_5);
+            GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, GPIO_PIN_4);
         }
         else
         {
-            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) * (50-duty/2)  / 100);
-            GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_5 , GPIO_PIN_5);
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_5, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) * (50 - duty / 2) / 100);
+            GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, GPIO_PIN_4);
         }
-        if (duty == 0) GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_5 , 0);
+        if (duty == 0)
+        {
+            PWMPulseWidthSet(PWM0_BASE, PWM_OUT_5, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) * 50 / 100);
+            GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, 0);
+        }
     }
 }
 
@@ -81,20 +98,17 @@ void init_PWM(void)
     // used.
     // TODO: change this to whichever GPIO port you are using.
     //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
 
-    // GPIOPadConfigSet(GPIO_PORTA_BASE, GPIO_PIN_5, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
-    GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_5, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
-    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_7, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
-    GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_5);// chong bi dinh voi chan o duoi
-    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
-    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_5);
+    // config
+    GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_4);
+    GPIOPadConfigSet(GPIO_PORTD_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOPinTypeGPIOOutput(GPIO_PORTD_BASE, GPIO_PIN_0);
 
-
-    GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_7 , 0);
-    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_5 , 0);
+    GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_4, 0);
+    GPIOPinWrite(GPIO_PORTD_BASE, GPIO_PIN_0, 0);
 
     //
     // Configure the GPIO pin muxing to select PWM functions for these pins.
@@ -103,8 +117,8 @@ void init_PWM(void)
     // Consult the data sheet to see which functions are allocated per pin.
     // TODO: change this to select the port/pin you are using.
     //
-    GPIOPinConfigure(GPIO_PB6_M0PWM0);
-    GPIOPinConfigure(GPIO_PB4_M0PWM2);
+    GPIOPinConfigure(GPIO_PE5_M0PWM5);
+    GPIOPinConfigure(GPIO_PD1_M0PWM7);
     // GPIOPinConfigure(GPIO_PB7_M0PWM1);
 
     //
@@ -112,8 +126,8 @@ void init_PWM(void)
     // the data sheet to see which functions are allocated per pin.
     // TODO: change this to select the port/pin you are using.
     //
-    GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_6);
-    GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_4);
+    GPIOPinTypePWM(GPIO_PORTE_BASE, GPIO_PIN_5);
+    GPIOPinTypePWM(GPIO_PORTD_BASE, GPIO_PIN_1);
     // GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_7);
 
     //
@@ -121,9 +135,9 @@ void init_PWM(void)
     // Note: Enabling the dead-band generator automatically couples the 2
     // outputs from the PWM block so we don't use the PWM synchronization.
     //
-    PWMGenConfigure(PWM0_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN);
+    PWMGenConfigure(PWM0_BASE, PWM_GEN_2, PWM_GEN_MODE_DOWN);
     // PWMGenConfigure(PWM0_BASE, PWM_GEN_2, PWM_GEN_MODE_DOWN);
-    PWMGenConfigure(PWM0_BASE, PWM_GEN_1, PWM_GEN_MODE_DOWN);
+    PWMGenConfigure(PWM0_BASE, PWM_GEN_3, PWM_GEN_MODE_DOWN);
 
     //
     // Set the PWM period to 250Hz.  To calculate the appropriate parameter
@@ -135,10 +149,8 @@ void init_PWM(void)
     // TODO: modify this calculation to use the clock frequency that you are
     // using.
     //
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 8000);
     PWMGenPeriodSet(PWM0_BASE, PWM_GEN_2, 8000);
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_1, 8000);
-
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_3, 8000);
 
     //
     // Set PWM0 PD0 to a duty cycle of 25%.  You set the duty cycle as a
@@ -146,9 +158,9 @@ void init_PWM(void)
     // PWMGenPeriodGet() function.  For this example the PWM will be high for
     // 25% of the time or 16000 clock cycles (64000 / 4).
     //
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_0) / 4);
-    // PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
+    // PWMPulseWidthSet(PWM0_BASE, PWM_OUT_5, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
+    // // PWMPulseWidthSet(PWM0_BASE, PWM_OUT_2, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_2) / 2);
+    // PWMPulseWidthSet(PWM0_BASE, PWM_OUT_7, PWMGenPeriodGet(PWM0_BASE, PWM_GEN_3) / 6);
     //
     // Enable the dead-band generation on the PWM0 output signal.  PWM bit 0
     // (PD0), will have a duty cycle of 25% (set above) and PWM bit 1 will have
@@ -167,13 +179,12 @@ void init_PWM(void)
     //
     // Enable the PWM0 Bit 0 (PD0) and Bit 1 (PD1) output signals.
     //
-    PWMOutputState(PWM0_BASE, PWM_OUT_1_BIT | PWM_OUT_2_BIT | PWM_OUT_0_BIT, true);
+    PWMOutputState(PWM0_BASE, PWM_OUT_5_BIT | PWM_OUT_7_BIT, true);
 
     //
     // Enables the counter for a PWM generator block.
     //
-    PWMGenEnable(PWM0_BASE, PWM_GEN_0);
+    // PWMGenEnable(PWM0_BASE, PWM_GEN_0);
     PWMGenEnable(PWM0_BASE, PWM_GEN_2);
-    PWMGenEnable(PWM0_BASE, PWM_GEN_1);
-
+    PWMGenEnable(PWM0_BASE, PWM_GEN_3);
 }

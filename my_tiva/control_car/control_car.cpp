@@ -28,6 +28,7 @@ ros::NodeHandle nh;
 ros::Publisher chatter("chatter", &str_msg);
 char hello[13] = "Hello world!";
 char my_debug[50];
+double my_ex_debug;
 
 
 huong dir = toi;
@@ -48,8 +49,8 @@ int main(void)
     nh.subscribe(my_sub_vel);
 
     main_c();
-    my_PID_set_vel_left_sp(-0.5);
-    my_PID_set_vel_right_sp(-0.5);
+    my_PID_set_vel_left_sp(1.5);
+    my_PID_set_vel_right_sp(1.5);
 
     // mypwm_setpwm(right_motor, 80, dir);
     // mypwm_setpwm(left_motor, 80, dir);
@@ -62,6 +63,18 @@ int main(void)
         chatter.publish(&str_msg);
 
         sprintf(my_debug, "toc do banh phai: %f", my_PID_get_vel_right_PV());
+        str_msg.data = my_debug;
+        chatter.publish(&str_msg);
+
+        // sprintf(my_debug, "toc do set banh trai: %f", my_PID_get_vel_left_sp());
+        // str_msg.data = my_debug;
+        // chatter.publish(&str_msg);
+
+        // sprintf(my_debug, "toc do set banh phai: %f", my_PID_get_vel_right_sp());
+        // str_msg.data = my_debug;
+        // chatter.publish(&str_msg);
+
+        sprintf(my_debug, "my debug: %f", my_debug_fnc());
         str_msg.data = my_debug;
         chatter.publish(&str_msg);
 
@@ -82,7 +95,7 @@ int main(void)
 void my_sub_vel_callback(const geometry_msgs::Twist &msg)
 {
     float my_linear_var, my_angular_var;
-    my_linear_var = msg.linear.x/4;
+    my_linear_var = msg.linear.x;
     my_angular_var = msg.angular.z;
     sprintf(my_debug, "toc do di thang get duoc: %f",my_linear_var );
     // my_PID_set_vel_left_sp(temp);
