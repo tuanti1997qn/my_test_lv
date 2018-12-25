@@ -3,13 +3,23 @@
 #include "my_pwm.h"
 #include "my_encoder.h"
 
+/*********************************************/
+#include <stdbool.h>
+#include <stdint.h>
+#include "inc/hw_memmap.h"
+#include "driverlib/gpio.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/pwm.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/uart.h"
+#include "utils/uartstdio.h"
+/*****************************************************/
 
 float debug;
 float my_debug_fnc(void)
 {
     return debug;
 }
-
 
 PID_para
     left =
@@ -79,14 +89,21 @@ void my_PID_get_PID_params(select_motor motor, PID_para *para)
     }
 }
 
-float my_PID_get_vel_left_PV( void )
+float my_PID_get_vel_left_PV(void)
 {
     return vel_left;
 }
 
-float my_PID_get_vel_right_PV( void )
+float my_PID_get_vel_right_PV(void)
 {
     return vel_right;
+}
+
+void my_PID_set_vel(float linear, float angular) // linear : m/s | angular: rad/s
+{
+    // cong thuc van toc dai = duong kinh * van toc goc / 2 * pi
+    my_PID_set_vel_left_sp(linear - D2W * angular);
+    my_PID_set_vel_right_sp(linear + D2W * angular);
 }
 
 /************************ static function ****************************************/
@@ -111,15 +128,16 @@ static float my_PID_process(float *error, float *pre_error, PID_para *para, huon
 
 extern void my_custom_timer_ISR(void)
 {
-    static float error_left, pre_error_left, error_right, pre_error_right, duty_temp;
+    static float error_left, pre_error_left, error_right, pre_error_right, duty_temp, error_left_smooth, error_right_smooth;
 
     huong dir;
 
     // //tinh van toc xe
-    vel_left = ((float)my_encoder_get_left_var() * cvb / xmv) / T;
-	// tinh sai so va set van toc
-    
+    vel_left = ((float)my_encoder_get_left_var() * CVB / XMV) / T;
+    // tinh sai so va set van toc
+
     error_left = vel_left_sp - vel_left;
+    error_left_smooth = error_left_smooth + 0.25*(error_left - error_left_smooth); // cong thuc a= a + alpha*(b - a) de lam muot lai error
     if (vel_left_sp == 0)
     {
         mypwm_setpwm(left_motor, 0, dir);
@@ -127,16 +145,18 @@ extern void my_custom_timer_ISR(void)
     }
     else
     {
-        duty_temp = my_PID_process(&error_left, &pre_error_left, &left, &dir);
-        mypwm_setpwm(left_motor, duty_temp , dir);
+        duty_temp = my_PID_process(&error_left_smooth, &pre_error_left, &left, &dir);
+        mypwm_setpwm(left_motor, duty_temp, dir);
+            debug = duty_temp;
+        // 1.2 la con so than thanh ma minh chem vao xem thu no co chay tot ko
         // mypwm_setpwm(left_motor, 99, toi);
-    // debug = my_PID_process(&error_left, &pre_error_left, &left, &dir);
-        debug = duty_temp;
+        // debug = my_PID_process(&error_left, &pre_error_left, &left, &dir);
         // mypwm_setpwm(left_motor, 70, toi);
     }
     //tinh van toc xe
-    vel_right = ((float)my_encoder_get_right_var() * cvb / xmv) / T;
+    vel_right = ((float)my_encoder_get_right_var() * CVB / XMV) / T;
     error_right = vel_right_sp - vel_right;
+    error_right_smooth = error_right_smooth + 0.25*(error_right - error_right_smooth);
     if (vel_right_sp == 0)
     {
         mypwm_setpwm(right_motor, 0, dir);
@@ -144,8 +164,8 @@ extern void my_custom_timer_ISR(void)
     }
     else
     {
-        mypwm_setpwm(right_motor, my_PID_process(&error_right, &pre_error_right, &right, &dir), dir);
-        // mypwm_setpwm(right_motor, 0, toi);
+        mypwm_setpwm(right_motor, my_PID_process(&error_right_smooth, &pre_error_right, &right, &dir), dir); // mypwm_setpwm(right_motor, 0, toi);
+        // 1.2 la con so than thanh ma minh chem vao xem thu no co chay tot ko
     }
 }
 
