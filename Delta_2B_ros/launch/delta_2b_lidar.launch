@@ -1,7 +1,7 @@
 <launch>
-  <node name="delta_2b_lidar"    pkg="delta_2b_lidar"  type="delta_2b_lidar_node" output="screen">
+  <!-- <node name="delta_2b_lidar"    pkg="delta_2b_lidar"  type="delta_2b_lidar_node" output="screen">
   <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
   <param name="frame_id"            type="string" value="laser"/>
-  </node>
+  </node> -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find delta_2b_lidar)/rviz/delta_2b_lidar.rviz"/>
 </launch>
